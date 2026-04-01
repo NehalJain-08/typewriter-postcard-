@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Cute Typewriter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffc2d1 0%, #ffb6c1 50%, #ffc4e1 100%);
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding-bottom: 20px;
+        }
+
+        .typewriter {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+        }
+
+        .typewriter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .brand {
+            font-size: clamp(18px, 4vw, 24px);
+            font-weight: bold;
+            color: #333;
+        }
+
+        .status-light {
+            width: 12px;
+            height: 12px;
+            background: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .paper-container {
+            background: #f9f9f9;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            height: 40vh;
+            min-height: 200px;
+            max-height: 400px;
+            margin: 15px 0;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .paper {
+            background: white;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            font-size: clamp(14px, 3.5vw, 18px);
+            line-height: 1.6;
+            color: #333;
+            text-align: left;
+            min-height: 200px;
+        }
+
+        .typed-text {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: clamp(16px, 4vw, 24px);
+            background: #333;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .controls input {
+            padding: 12px 15px;
+            border: 2px solid #333;
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: clamp(16px, 4vw, 18px);
+            width: 100%;
+            max-width: 200px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: clamp(12px, 3vw, 14px);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+
+        .btn-clear {
+            background: #f3f4f6;
+            color: #666;
+        }
+
+        .btn-clear:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-send {
+            background: #333;
+            color: white;
+        }
+
+        .btn-send:hover {
+            background: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .char-count {
+            font-size: clamp(10px, 2.5vw, 12px);
+            color: #888;
+            margin-top: 8px;
+        }
+
+        .hint {
+            font-size: clamp(12px, 3vw, 14px);
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .instructions {
+            font-size: clamp(10px, 2.5vw, 12px);
+            color: #999;
+            margin-top: 8px;
+        }
+
+        /* Typewriter Keyboard */
+        .keyboard {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding: 10px;
+            background: transparent;
+            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .key {
+            width: clamp(28px, 8vw, 38px);
+            height: clamp(36px, 10vw, 46px);
+            min-width: 32px;
+            min-height: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 2px solid #333;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: clamp(9px, 2.5vw, 12px);
+            cursor: default;
+            box-shadow: 0 2px 0 #333;
+            transition: transform 0.05s, box-shadow 0.05s, background 0.05s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @media (max-width: 480px) {
+            .keyboard-row {
+                gap: 2px;
+            }
+            .keyboard {
+                gap: 2px;
+                padding: 8px;
+            }
+            .key {
+                min-width: 26px;
+                min-height: 38px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .keyboard-row {
+                gap: 2px;
+            }
+            .keyboard {
+                padding: 5px;
+                gap: 2px;
+            }
+            .key {
+                min-width: 22px;
+                min-height: 34px;
+                font-size: 9px;
+            }
+            .key.wide-space {
+                min-width: 100px;
+            }
+        }
+
+        .key.wide {
+            width: clamp(40px, 11vw, 55px);
+        }
+
+        .key.wider {
+            width: clamp(50px, 14vw, 70px);
+        }
+
+        .key.wide-space {
+            width: clamp(120px, 30vw, 200px);
+        }
+
+        .key.pressed {
+            transform: translateY(3px);
+            box-shadow: 0 0 0 #333, inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .key.caps-active {
+            background: #ff6b9d;
+            color: white;
+        }
+
+        .key.shift-active {
+            background: #6366f1;
+            color: white;
+        }
+
+        /* Postcard Overlay */
+        .postcard-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .postcard-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .envelope {
+            width: 95vw;
+            max-width: 500px;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .envelope-flap {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%);
+            height: clamp(150px, 35vw, 200px);
+            border-radius: 12px 12px 0 0;
+            position: relative;
+            transform-origin: top;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .envelope-flap::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: clamp(60px, 15vw, 80px);
+            height: clamp(45px, 10vw, 60px);
+            filter: grayscale(1);
+            opacity: 0.7;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 70'%3E%3Crect x='5' y='5' width='90' height='60' rx='3' fill='%23ffffff' stroke='%23333' stroke-width='2'/%3E%3Crect x='5' y='5' width='90' height='15' fill='%23ff6b9d'/%3E%3Crect x='30' y='15' width='40' height='2' fill='%23ccc'/%3E%3Crect x='30' y='20' width='40' height='2' fill='%23ccc'/%3E%3Crect x='30' y='25' width='40' height='2' fill='%23ccc'/%3E%3Crect x='30' y='30' width='40' height='2' fill='%23ccc'/%3E%3Crect x='30' y='35' width='40' height='2' fill='%23ccc'/%3E%3Crect x='30' y='40' width='40' height='2' fill='%23ccc'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        .envelope-body {
+            background: #fff5f7;
+            height: clamp(180px, 40vw, 250px);
+            border-radius: 0 0 12px 12px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .envelope-flap.open {
+            transform: rotateX(180deg);
+        }
+
+        .letter {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            width: 90%;
+            max-width: 450px;
+            height: 80%;
+            background: white;
+            padding: 12px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        .envelope-flap.open + .envelope-body .letter {
+            transform: translateX(-50%) translateY(10%);
+            opacity: 1;
+        }
+
+        .letter-content {
+            font-size: clamp(12px, 3vw, 16px);
+            line-height: 1.5;
+            color: #333;
+            text-align: left;
+            white-space: pre-wrap;
+        }
+
+        .letter-footer {
+            margin-top: 12px;
+            text-align: center;
+            font-size: clamp(10px, 2.5vw, 13px);
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 8px;
+        }
+
+        .letter-details {
+            margin-top: 8px;
+            font-family: 'Georgia', serif;
+            font-size: clamp(9px, 2vw, 12px);
+            color: #666;
+            text-align: left;
+        }
+
+        .letter-details p {
+            margin: 5px 0;
+            display: flex;
+        }
+
+        .letter-details strong {
+            min-width: 50px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .heart-svg {
+            width: 20px;
+            height: 20px;
+            margin: 10px auto;
+            display: block;
+            opacity: 0.7;
+        }
+
+        .share-link-container {
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+            padding: 0 10px;
+        }
+
+        .share-link-container.show {
+            display: block;
+        }
+
+        .share-link {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #ff6b9d;
+            color: #333;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(10px, 2.5vw, 12px);
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto;
+            display: block;
+            text-align: center;
+        }
+
+        .btn-copy {
+            background: #ff6b9d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            transition: background 0.3s ease;
+            font-size: clamp(12px, 3vw, 14px);
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+
+        .btn-copy:hover {
+            background: #ff5a8a;
+        }
+
+        .btn-close {
+            position: absolute;
+            top: -45px;
+            right: 0;
+            background: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            touch-action: manipulation;
+        }
+
+        .host-note {
+            font-size: clamp(9px, 2vw, 11px);
+            color: #888;
+            margin-top: 10px;
+            max-width: 350px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 10px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: clamp(20px, 5vh, 30px);
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: clamp(10px, 2.5vw, 12px) clamp(15px, 4vw, 25px);
+            border-radius: 20px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            .typewriter {
+                padding: 15px;
+                border-radius: 12px;
+            }
+
+            .paper-container {
+                height: 35vh;
+                min-height: 180px;
+            }
+
+            .keyboard {
+                margin-top: 15px;
+            }
+
+            .input-row, .button-row {
+                width: 100%;
+            }
+
+            .input-row input {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .btn {
+                flex: 1;
+                min-width: 80px;
+            }
+        }
+
+        /* Prevent text selection on keyboard */
+        .keyboard {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Smooth scrolling for paper */
+        .paper-container {
+            scroll-behavior: smooth;
+        }
+
+        /* Better focus for accessibility */
+        input:focus, button:focus {
+            outline: 2px solid #ff6b9d;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="typewriter">
+            <div class="typewriter-header">
+                <span class="brand">Typewriter</span>
+                <div class="status-light"></div>
+            </div>
+
+            <div class="paper-container">
+                <div class="paper">
+                    <div class="typed-text">
+                        <span id="text"></span><span class="cursor"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="char-count">
+                Characters: <span id="charCount">0</span>
+            </div>
+
+            <div class="controls">
+                <div class="input-row">
+                    <input type="text" id="recipientInput" placeholder="To:">
+                    <input type="text" id="senderInput" placeholder="From:">
+                </div>
+                <div class="button-row">
+                    <button class="btn btn-clear" onclick="clearText()">Clear</button>
+                    <button class="btn btn-send" onclick="openPostcard()">Send as Postcard</button>
+                </div>
+            </div>
+
+            <div style="height: 20px;"></div>
+
+            <div id="keyboard-container"></div>
+        </div>
+    </div>
+
+    <div class="postcard-overlay" id="postcardOverlay">
+        <div class="envelope">
+            <div class="envelope-flap" id="envelopeFlap">
+                <button class="btn-close" onclick="closePostcard()">X</button>
+            </div>
+            <div class="envelope-body">
+                <div class="letter" id="letter">
+                    <div class="letter-content" id="letterContent"></div>
+                    <div class="letter-footer">
+                        <svg class="heart-svg" viewBox="0 0 24 24" fill="none" stroke="#ff6b9d" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <div class="letter-details">
+                            <p><strong>To:</strong> <span id="recipientName">My Dear Friend</span></p>
+                            <p><strong>From:</strong> <span id="senderName">A Typewriter</span></p>
+                        </div>
+                        <p class="letter-date"><span id="shareDate"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="share-link-container" id="shareLinkContainer">
+                <p style="color: #333; margin-bottom: 10px; font-weight: bold;">Share this postcard:</p>
+                <button class="btn-copy" onclick="copyLink()">Copy Link</button>
+                <p class="host-note">Note: To share, upload this HTML file to a web host (GitHub Pages, Netlify, etc.). The link works once hosted online.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Link copied!</div>
+
+    <script>
+        let typedContent = '';
+        let currentShareUrl = '';
+        let shiftPressed = false;
+
+        // Load initial postcard data if server injected it (for shared links)
+        window.addEventListener('load', () => {
+            if (window.INITIAL_POSTCARD) {
+                console.log('Loading postcard from server:', window.INITIAL_POSTCARD);
+                typedContent = window.INITIAL_POSTCARD.text;
+                document.getElementById('text').textContent = window.INITIAL_POSTCARD.text;
+                document.getElementById('charCount').textContent = window.INITIAL_POSTCARD.text.length;
+                document.getElementById('recipientName').textContent = window.INITIAL_POSTCARD.to;
+                document.getElementById('senderName').textContent = window.INITIAL_POSTCARD.from;
+                document.getElementById('recipientInput').value = window.INITIAL_POSTCARD.to;
+                document.getElementById('senderInput').value = window.INITIAL_POSTCARD.from;
+                document.getElementById('shareDate').textContent = window.INITIAL_POSTCARD.date;
+                updatePaperPosition();
+
+                // Auto-open postcard after short delay
+                setTimeout(openPostcard, 500);
+            }
+        });
+
+        // Check if viewing a shared postcard (legacy support - hash-based links)
+        function loadSharedLetter() {
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#letter=')) {
+                try {
+                    const rawData = JSON.parse(decodeURIComponent(hash.substring(7)));
+                    const letterData = {
+                        text: rawData.t || rawData.text || '',
+                        to: rawData.r || rawData.to || 'My Dear Friend',
+                        from: rawData.f || rawData.from || 'A Typewriter',
+                        date: rawData.d || rawData.date || new Date().toLocaleDateString()
+                    };
+                    typedContent = letterData.text;
+                    document.getElementById('text').textContent = letterData.text;
+                    document.getElementById('charCount').textContent = letterData.text.length;
+                    document.getElementById('recipientName').textContent = letterData.to;
+                    document.getElementById('senderName').textContent = letterData.from;
+                    document.getElementById('recipientInput').value = letterData.to;
+                    document.getElementById('senderInput').value = letterData.from;
+                    document.getElementById('shareDate').textContent = letterData.date;
+                    updatePaperPosition();
+
+                    setTimeout(() => {
+                        openPostcard();
+                    }, 500);
+                } catch (e) {
+                    console.error('Failed to load shared letter:', e);
+                }
+            }
+        }
+
+        window.addEventListener('load', loadSharedLetter);
+        window.addEventListener('hashchange', loadSharedLetter);
+
+        let capsLockOn = false;
+        const TYPEABLE_KEY_CODES = new Set([
+            // Digits
+            'Digit0','Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9',
+            // Letters
+            'KeyA','KeyB','KeyC','KeyD','KeyE','KeyF','KeyG','KeyH','KeyI','KeyJ','KeyK','KeyL','KeyM',
+            'KeyN','KeyO','KeyP','KeyQ','KeyR','KeyS','KeyT','KeyU','KeyV','KeyW','KeyX','KeyY','KeyZ',
+            // Navigation/editing
+            'Space','Backspace','Enter','Tab',
+            // Punctuation
+            'Minus','Equal','BracketLeft','BracketRight','Backslash',
+            'Semicolon','Quote','Comma','Period','Slash'
+        ]);
+        let physicalShiftDown = false;
+        let virtualShift = false;
+
+        function updateEffectiveShift() {
+            shiftPressed = physicalShiftDown || virtualShift;
+        }
+
+        // Type a character based on key code
+        function typeFromKey(code) {
+            const keyMap = {
+                'Digit1': '1', 'Digit2': '2', 'Digit3': '3', 'Digit4': '4', 'Digit5': '5',
+                'Digit6': '6', 'Digit7': '7', 'Digit8': '8', 'Digit9': '9', 'Digit0': '0',
+                'Minus': '-', 'Equal': '=', 'Backspace': 'BACKSPACE',
+                'Tab': '\t',
+                'KeyQ': 'q', 'KeyW': 'w', 'KeyE': 'e', 'KeyR': 'r', 'KeyT': 't',
+                'KeyY': 'y', 'KeyU': 'u', 'KeyI': 'i', 'KeyO': 'o', 'KeyP': 'p',
+                'BracketLeft': '[', 'BracketRight': ']', 'Backslash': '\\',
+                'CapsLock': 'CAPS',
+                'KeyA': 'a', 'KeyS': 's', 'KeyD': 'd', 'KeyF': 'f', 'KeyG': 'g',
+                'KeyH': 'h', 'KeyJ': 'j', 'KeyK': 'k', 'KeyL': 'l',
+                'Semicolon': ';', 'Quote': "'", 'Enter': '\n',
+                'ShiftLeft': 'SHIFT', 'ShiftRight': 'SHIFT',
+                'KeyZ': 'z', 'KeyX': 'x', 'KeyC': 'c', 'KeyV': 'v', 'KeyB': 'b',
+                'KeyN': 'n', 'KeyM': 'm', 'Comma': ',', 'Period': '.', 'Slash': '/',
+                'ControlLeft': 'CTRL', 'ControlRight': 'CTRL',
+                'AltLeft': 'ALT', 'AltRight': 'ALT',
+                'Space': ' '
+            };
+
+            // Handle CapsLock toggle
+            if (code === 'CapsLock') {
+                capsLockOn = !capsLockOn;
+                // Visual feedback
+                const keyElem = document.querySelector('.key[data-code="CapsLock"]');
+                if (keyElem) {
+                    keyElem.classList.add('pressed');
+                    setTimeout(() => keyElem.classList.remove('pressed'), 150);
+                }
+                updateCapsLockIndicator();
+                return;
+            }
+
+
+            const char = keyMap[code];
+            if (!char) return;
+
+            // Visual feedback
+            const keySelector = `.key[data-code="${code}"]`;
+            const keyElem = document.querySelector(keySelector);
+            if (keyElem) {
+                keyElem.classList.add('pressed');
+                setTimeout(() => keyElem.classList.remove('pressed'), 150);
+            }
+
+            // Determine if character should be uppercase
+            // Either shift is held OR caps lock is on (but not both together - they cancel out)
+            let shouldBeUpper = false;
+            if (char.length === 1 && /[a-z]/.test(char)) {
+                if (shiftPressed && !capsLockOn) {
+                    shouldBeUpper = true;
+                } else if (capsLockOn && !shiftPressed) {
+                    shouldBeUpper = true;
+                }
+            }
+
+            // Apply uppercase
+            if (shouldBeUpper) {
+                char = char.toUpperCase();
+            }
+
+            // Handle special keys
+            if (char === 'BACKSPACE') {
+                typedContent = typedContent.slice(0, -1);
+            } else if (char === '\n') {
+                typedContent += '\n';
+            } else if (char.length === 1) {
+                typedContent += char;
+            }
+
+
+            document.getElementById('text').textContent = typedContent;
+            document.getElementById('charCount').textContent = typedContent.length;
+            updatePaperPosition();
+        }
+
+        // Update caps lock indicator
+        function updateCapsLockIndicator() {
+            const keyElem = document.querySelector('.key[data-code="CapsLock"]');
+            if (keyElem) {
+                if (capsLockOn) {
+                    keyElem.classList.add('caps-active');
+                } else {
+                    keyElem.classList.remove('caps-active');
+                }
+            }
+        }
+
+        // Update shift indicator
+        function updateShiftIndicator() {
+            const shiftKeys = document.querySelectorAll('.key[data-code="ShiftLeft"], .key[data-code="ShiftRight"]');
+            shiftKeys.forEach(key => {
+                if (shiftPressed) {
+                    key.classList.add('shift-active');
+                } else {
+                    key.classList.remove('shift-active');
+                }
+            });
+        }
+
+        // Build the typewriter keyboard
+        function createKeyboard() {
+            const layout = [
+                // Row 1: Numbers and symbols
+                ['Digit1', '1'], ['Digit2', '2'], ['Digit3', '3'], ['Digit4', '4'], ['Digit5', '5'],
+                ['Digit6', '6'], ['Digit7', '7'], ['Digit8', '8'], ['Digit9', '9'], ['Digit0', '0'],
+                ['Minus', '-'], ['Equal', '='], ['Backspace', 'Backspace'],
+                // Row 2: QWERTY
+                ['Tab', 'Tab'], ['KeyQ', 'Q'], ['KeyW', 'W'], ['KeyE', 'E'], ['KeyR', 'R'],
+                ['KeyT', 'T'], ['KeyY', 'Y'], ['KeyU', 'U'], ['KeyI', 'I'], ['KeyO', 'O'],
+                ['KeyP', 'P'], ['BracketLeft', '['], ['BracketRight', ']'], ['Backslash', '\\'],
+                // Row 3: ASDF
+                ['CapsLock', 'Caps'], ['KeyA', 'A'], ['KeyS', 'S'], ['KeyD', 'D'], ['KeyF', 'F'],
+                ['KeyG', 'G'], ['KeyH', 'H'], ['KeyJ', 'J'], ['KeyK', 'K'], ['KeyL', 'L'],
+                ['Semicolon', ';'], ['Quote', "'"], ['Enter', 'Enter'],
+                // Row 4: ZXCV
+                ['ShiftLeft', 'Shift'], ['KeyZ', 'Z'], ['KeyX', 'X'], ['KeyC', 'C'], ['KeyV', 'V'],
+                ['KeyB', 'B'], ['KeyN', 'N'], ['KeyM', 'M'], ['Comma', ','], ['Period', '.'],
+                ['Slash', '/'], ['ShiftRight', 'Shift'],
+                // Row 5: Space and modifiers
+                ['ControlLeft', 'Ctrl'], ['AltLeft', 'Alt'], ['Space', 'SPACE'], ['AltRight', 'Alt'], ['ControlRight', 'Ctrl']
+            ];
+
+            const container = document.getElementById('keyboard-container');
+            const rows = [
+                layout.slice(0, 13),
+                layout.slice(13, 27),
+                layout.slice(27, 41),
+                layout.slice(41, 54),
+                layout.slice(54)
+            ];
+
+            rows.forEach(rowKeys => {
+                const row = document.createElement('div');
+                row.className = 'keyboard-row';
+                rowKeys.forEach(([code, label]) => {
+                    const key = document.createElement('button');
+                    key.className = 'key';
+                    key.dataset.code = code;
+                    key.textContent = label;
+                    if (code === 'Space') key.classList.add('wide-space');
+                    else if (code === 'Tab' || code === 'CapsLock' || code === 'Enter' || code === 'Backspace' || code === 'ShiftLeft' || code === 'ShiftRight' || code === 'ControlLeft' || code === 'ControlRight' || code === 'AltLeft' || code === 'AltRight') {
+                        // Adjust width based on label length
+                        key.style.width = label.length > 4 ? '65px' : '55px';
+                    }
+                    // Add click and touch handlers
+                    const pressHandler = (e) => {
+                        e.preventDefault();
+                        if (code === 'ShiftLeft' || code === 'ShiftRight') {
+                            virtualShift = !virtualShift;
+                            updateEffectiveShift();
+                        } else {
+                            typeFromKey(code);
+                        }
+                        // Visual feedback
+                        key.classList.add('pressed');
+                        setTimeout(() => key.classList.remove('pressed'), 150);
+                    };
+
+                    const enterHandler = (e) => {
+                        if (e.type === 'touchstart') {
+                            e.preventDefault();
+                            pressHandler(e);
+                        }
+                    };
+
+                    key.addEventListener('click', pressHandler);
+                    key.addEventListener('touchstart', enterHandler, { passive: false });
+                    row.appendChild(key);
+                });
+                container.appendChild(row);
+            });
+        }
+
+        createKeyboard();
+
+        // Scroll the container to bottom automatically
+        function updatePaperPosition() {
+            const paperContainer = document.querySelector('.paper-container');
+            // Scroll to bottom to show latest content
+            paperContainer.scrollTop = paperContainer.scrollHeight;
+        }
+
+        // Check if viewing a shared postcard
+        function loadSharedLetter() {
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#letter=')) {
+                try {
+                    const rawData = JSON.parse(decodeURIComponent(hash.substring(7)));
+                    // Handle both short keys (new) and long keys (backward compatible)
+                    const letterData = {
+                        text: rawData.t || rawData.text || '',
+                        to: rawData.r || rawData.to || 'My Dear Friend',
+                        from: rawData.f || rawData.from || 'A Typewriter',
+                        date: rawData.d || rawData.date || new Date().toLocaleDateString()
+                    };
+                    document.getElementById('text').textContent = letterData.text;
+                    typedContent = letterData.text;
+                    document.getElementById('charCount').textContent = letterData.text.length;
+                    document.getElementById('recipientName').textContent = letterData.to;
+                    document.getElementById('senderName').textContent = letterData.from;
+                    // Also set the input fields so openPostcard() uses the same values
+                    document.getElementById('recipientInput').value = letterData.to;
+                    document.getElementById('senderInput').value = letterData.from;
+                    document.getElementById('shareDate').textContent = letterData.date;
+                    updatePaperPosition();
+
+                    // Show postcard animation automatically with longer delay to ensure DOM is ready
+                    setTimeout(() => {
+                        console.log('Opening postcard from shared link...');
+                        openPostcard();
+                    }, 500);
+                } catch (e) {
+                    console.error('Failed to load shared letter:', e);
+                }
+            }
+        }
+
+        // Load on startup
+        loadSharedLetter();
+
+        // Handle hash changes (user navigates to a shared link without page reload)
+        window.addEventListener('hashchange', loadSharedLetter);
+
+        // Also handle back/forward navigation in case hashchange doesn't fire
+        window.addEventListener('load', loadSharedLetter);
+
+        // Keyboard physical input - delegate to typeFromKey
+        document.addEventListener('keydown', (e) => {
+            // If user is typing in an input field, let them type normally
+            const activeElement = document.activeElement;
+            if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            // Handle CapsLock toggle
+            if (e.code === 'CapsLock') {
+                e.preventDefault();
+                capsLockOn = !capsLockOn;
+                updateCapsLockIndicator();
+                return;
+            }
+
+            // Handle shift key state
+            if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+                physicalShiftDown = true;
+                updateEffectiveShift();
+                e.preventDefault();
+                updateShiftIndicator();
+                return;
+            }
+
+            // Process typeable keys
+            if (TYPEABLE_KEY_CODES.has(e.code) && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                e.preventDefault();
+                typeFromKey(e.code);
+            }
+        });
+
+        // Reset shift when key is released
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+                physicalShiftDown = false;
+                updateEffectiveShift();
+                updateShiftIndicator();
+            }
+        });
+
+        function clearText() {
+            typedContent = '';
+            document.getElementById('text').textContent = '';
+            document.getElementById('charCount').textContent = '0';
+            // Reset scroll to top
+            const paperContainer = document.querySelector('.paper-container');
+            paperContainer.scrollTop = 0;
+            // Reset caps lock
+            capsLockOn = false;
+            updateCapsLockIndicator();
+
+            // Remove hash from URL
+            if (window.location.hash) {
+                history.replaceState(null, null, ' ');
+            }
+        }
+
+        function openPostcard() {
+            const overlay = document.getElementById('postcardOverlay');
+            const flap = document.getElementById('envelopeFlap');
+            const linkContainer = document.getElementById('shareLinkContainer');
+            const letterContent = document.getElementById('letterContent');
+
+            if (typedContent.trim() === '') {
+                showToast('Write something first!');
+                return;
+            }
+
+            // Set letter content immediately (show user what they wrote)
+            letterContent.textContent = typedContent;
+            const dateElement = document.getElementById('shareDate');
+            if (!dateElement.textContent.trim()) {
+                dateElement.textContent = new Date().toLocaleDateString();
+            }
+            document.getElementById('recipientName').textContent = document.getElementById('recipientInput').value || 'My Dear Friend';
+            document.getElementById('senderName').textContent = document.getElementById('senderInput').value || 'A Typewriter';
+
+            // Show overlay animatically BEFORE API call
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            linkContainer.classList.remove('show');
+
+            setTimeout(() => {
+                flap.classList.add('open');
+            }, 100);
+
+            // Send postcard to server to get short URL
+            const recipient = document.getElementById('recipientInput').value || 'My Dear Friend';
+            const sender = document.getElementById('senderInput').value || 'A Typewriter';
+            const postcardData = {
+                text: typedContent,
+                to: recipient,
+                from: sender,
+                date: dateElement.textContent
+            };
+
+            fetch('/api/postcards', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(postcardData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.url) {
+                    currentShareUrl = data.url;
+                    console.log('Postcard saved! Share URL:', data.url);
+                    showToast('Postcard ready! Copy the link below');
+                } else {
+                    throw new Error(data.error || 'Failed to save');
+                }
+            })
+            .catch(err => {
+                console.error('Error saving postcard:', err);
+                showToast('Server error - using local link');
+                // Fallback to old hash-based link if server fails
+                const baseUrl = window.location.href.split('#')[0];
+                const letterData = JSON.stringify({
+                    t: typedContent,
+                    r: recipient,
+                    f: sender,
+                    d: dateElement.textContent
+                });
+                currentShareUrl = baseUrl + '#letter=' + encodeURIComponent(letterData);
+                showToast('Using local link (upload to share)');
+            })
+            .finally(() => {
+                // Show link container after animation completes
+                setTimeout(() => {
+                    linkContainer.classList.add('show');
+                }, 900);
+            });
+        }
+
+        function closePostcard() {
+            const overlay = document.getElementById('postcardOverlay');
+            const flap = document.getElementById('envelopeFlap');
+            const linkContainer = document.getElementById('shareLinkContainer');
+
+            linkContainer.classList.remove('show');
+
+            setTimeout(() => {
+                flap.classList.remove('open');
+            }, 200);
+
+            setTimeout(() => {
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }, 800);
+        }
+
+        function copyLink() {
+            if (!currentShareUrl) {
+                showToast('No link to copy');
+                return;
+            }
+            navigator.clipboard.writeText(currentShareUrl).then(() => {
+                showToast('Link copied! Upload to share');
+            }).catch(err => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = currentShareUrl;
+                textarea.style.position = 'fixed'; // avoid scrolling to bottom
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Link copied! Upload to share');
+                } catch (e) {
+                    showToast('Failed to copy');
+                }
+                document.body.removeChild(textarea);
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Close overlay with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('postcardOverlay');
+                if (overlay.classList.contains('active')) {
+                    closePostcard();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
