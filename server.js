@@ -73,6 +73,14 @@ app.post('/api/postcards', (req, res) => {
     });
 });
 
+// API: Get all postcards
+app.get('/api/postcards', (req, res) => {
+    const postcardList = Object.values(postcards).sort((a, b) => {
+        return new Date(b.created) - new Date(a.created);
+    });
+    res.json(postcardList);
+});
+
 // API: Get a postcard by ID
 app.get('/api/postcards/:id', (req, res) => {
     const postcard = postcards[req.params.id];
@@ -136,7 +144,16 @@ function generateShortId() {
 }
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
+    const interfaces = require('os').networkInterfaces();
     console.log(`\n🌸 Typewriter Postcard Server running at http://localhost:${PORT}`);
-    console.log(`📱 Open in browser: http://localhost:${PORT}\n`);
+    console.log(`📱 Accessible from network:`);
+    Object.keys(interfaces).forEach(name => {
+        interfaces[name].forEach(iface => {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                console.log(`   http://${iface.address}:${PORT}`);
+            }
+        });
+    });
+    console.log(`\n`);
 });
