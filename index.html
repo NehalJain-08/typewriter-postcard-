@@ -198,135 +198,6 @@
             margin-top: 8px;
         }
 
-        /* Postcards List */
-        .postcards-list-container {
-            margin-top: 30px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 12px;
-            max-width: 800px;
-            width: 100%;
-        }
-
-        .postcards-list-title {
-            font-size: clamp(16px, 4vw, 20px);
-            color: #333;
-            margin-bottom: 15px;
-            font-weight: bold;
-            text-align: left;
-            border-bottom: 2px solid #ff6b9d;
-            padding-bottom: 8px;
-        }
-
-        .postcards-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .postcard-item {
-            background: white;
-            border: 2px solid #ff6b9d;
-            border-radius: 8px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            transition: transform 0.2s ease;
-        }
-
-        .postcard-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.2);
-        }
-
-        .postcard-info {
-            flex: 1;
-            min-width: 150px;
-            text-align: left;
-        }
-
-        .postcard-info .date {
-            font-size: clamp(10px, 2.5vw, 12px);
-            color: #888;
-            margin-bottom: 4px;
-        }
-
-        .postcard-info .recipient {
-            font-size: clamp(14px, 3.5vw, 16px);
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 2px;
-        }
-
-        .postcard-info .sender {
-            font-size: clamp(12px, 3vw, 14px);
-            color: #666;
-        }
-
-        .postcard-info .preview-text {
-            font-size: clamp(10px, 2.5vw, 12px);
-            color: #999;
-            font-style: italic;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 250px;
-        }
-
-        .btn-view {
-            background: #ff6b9d;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: clamp(10px, 2.5vw, 12px);
-            min-height: 36px;
-            touch-action: manipulation;
-            white-space: nowrap;
-        }
-
-        .btn-view:hover {
-            background: #ff5a8a;
-        }
-
-        .no-postcards {
-            text-align: center;
-            color: #888;
-            padding: 20px;
-            font-style: italic;
-        }
-
-        @media (max-width: 480px) {
-            .postcards-list-container {
-                padding: 10px;
-                margin-top: 20px;
-            }
-
-            .postcard-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .postcard-info {
-                width: 100%;
-            }
-
-            .postcard-info .preview-text {
-                max-width: 100%;
-            }
-
-            .btn-view {
-                width: 100%;
-            }
-        }
-
         /* Typewriter Keyboard */
         .keyboard {
             margin-top: 20px;
@@ -743,11 +614,6 @@
             <div style="height: 20px;"></div>
 
             <div id="keyboard-container"></div>
-
-            <div class="postcards-list-container" id="postcardsListContainer" style="display: none;">
-                <div class="postcards-list-title">📨 My Sent Postcards</div>
-                <div class="postcards-list" id="postcardsList"></div>
-            </div>
         </div>
     </div>
 
@@ -1282,49 +1148,6 @@
                     closePostcard();
                 }
             }
-        });
-
-        // Load all sent postcards
-        async function loadMyPostcards() {
-            try {
-                const response = await fetch('/api/postcards');
-                if (!response.ok) throw new Error('Failed to fetch');
-                const postcards = await response.json();
-
-                const container = document.getElementById('postcardsListContainer');
-                const list = document.getElementById('postcardsList');
-
-                if (postcards.length === 0) {
-                    container.style.display = 'block';
-                    list.innerHTML = '<div class="no-postcards">No postcards sent yet. Write your first message!</div>';
-                    return;
-                }
-
-                container.style.display = 'block';
-                list.innerHTML = postcards.map(pc => `
-                    <div class="postcard-item">
-                        <div class="postcard-info">
-                            <div class="date">${pc.date}</div>
-                            <div class="recipient">To: ${pc.to}</div>
-                            <div class="sender">From: ${pc.from}</div>
-                            <div class="preview-text">"${pc.text.substring(0, 50)}${pc.text.length > 50 ? '...' : ''}"</div>
-                        </div>
-                        <button class="btn-view" onclick="viewPostcard('${pc.id}')">View</button>
-                    </div>
-                `).join('');
-            } catch (err) {
-                console.error('Error loading postcards:', err);
-            }
-        }
-
-        // View a specific postcard
-        function viewPostcard(id) {
-            window.location.href = `/p/${id}`;
-        }
-
-        // Load postcards on page start
-        window.addEventListener('load', () => {
-            loadMyPostcards();
         });
     </script>
 </body>

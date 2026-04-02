@@ -73,14 +73,6 @@ app.post('/api/postcards', (req, res) => {
     });
 });
 
-// API: Get all postcards
-app.get('/api/postcards', (req, res) => {
-    const postcardList = Object.values(postcards).sort((a, b) => {
-        return new Date(b.created) - new Date(a.created);
-    });
-    res.json(postcardList);
-});
-
 // API: Get a postcard by ID
 app.get('/api/postcards/:id', (req, res) => {
     const postcard = postcards[req.params.id];
